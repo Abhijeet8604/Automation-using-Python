@@ -1,0 +1,539 @@
+from selenium import webdriver
+from selenium.webdriver.common.by import By
+from selenium.common.exceptions import NoSuchElementException
+from datetime import datetime, timedelta
+import smtplib
+from email.mime.text import MIMEText
+from email.mime.multipart import MIMEMultipart
+import pygetwindow as gw
+import time
+import os
+import pygetwindow
+import pyautogui
+import win32gui
+import win32con
+
+target_file_name = "*** Dashboard" 
+loginemail = "****"
+loginpass = "****"
+
+# Function to check if an element is present
+
+def is_element_present(by, value):
+    try:
+        driver.find_element(by, value)
+        return True
+    except NoSuchElementException:
+        return False
+
+# Function to bring the Chrome window to the front if minimized
+def bring_chrome_to_front():
+    chrome_title = "Power BI - Google Chrome"
+    chrome_window = gw.getWindowsWithTitle(chrome_title)
+    if chrome_window:
+        chrome_window = chrome_window[0]
+        if chrome_window.isMinimized:
+            chrome_window.restore()
+            time.sleep(1)
+            chrome_window.activate()
+
+def chrome_sign_in():
+    chrome_titles = ["Power BI Sign in - Google Chrome", "Sign in to your account - Google Chrome"]
+    found = False
+
+    for title in chrome_titles:
+        chrome_windows = gw.getWindowsWithTitle(title)
+        if chrome_windows:
+            chrome_window = chrome_windows[0]
+            if chrome_window.isMinimized:
+                chrome_window.restore()
+                time.sleep(1)
+            chrome_window.close()  # Close the Chrome window if it exists
+            found = True
+            break
+
+    if found:
+        print("Found and closed a Chrome window with one of the specified titles.")
+    else:
+        print("Chrome window(s) not found, continuing with other actions...")
+
+def bring_chrome_to_fronttt():
+    chrome_title = "Open"
+    chrome_windows = gw.getWindowsWithTitle(chrome_title)
+    for window in chrome_windows:
+        window.maximize()
+        
+def minimize_all_windows():
+    pyautogui.hotkey('win', 'm')
+def send_email(sender_email, sender_password, receiver_email, subject, message):
+    # Set up the MIME
+    msg = MIMEMultipart()
+    msg['From'] = sender_email
+    msg['To'] = receiver_email
+    msg['Subject'] = subject
+
+    # Add body to email
+    msg.attach(MIMEText(message, 'plain'))
+
+    # Connect to the SMTP server
+    server = smtplib.SMTP('smtp.gmail.com', 587)
+    server.starttls()
+
+    # Login to the email account
+    server.login(sender_email, sender_password)
+
+    # Send the email
+    server.sendmail(sender_email, receiver_email, msg.as_string())
+
+    # Quit the server
+    server.quit()
+    
+def send_success_email(sender_email, sender_password, receiver_email, subject, message):
+    # Set up the MIME
+    msg = MIMEMultipart()
+    msg['From'] = sender_email
+    msg['To'] = receiver_email
+    msg['Subject'] = subject
+
+    # Add body to email
+    msg.attach(MIMEText(message, 'plain'))
+
+    # Connect to the SMTP server
+    server = smtplib.SMTP('smtp.gmail.com', ***)
+    server.starttls()
+
+    # Login to the email account
+    server.login(sender_email, sender_password)
+
+    # Send the email
+    server.sendmail(sender_email, receiver_email, msg.as_string())
+
+    # Quit the server
+    server.quit()
+    
+# Example usage for sending a success email
+success_subject = 'Success email'
+success_message = 'The script executed successfully without errors.'
+
+Keyboard_subject='User Interrupt'
+keyboard_message='Execution interrupted by user'
+
+Error_subject='Error Occured'
+Error_message='Following Error occured: '
+
+Browse_error='Web Page Error'
+Browse_message='Web Page Not Loaded Properly '
+
+# Example usage:
+sender_email = '****'
+sender_password = '****'
+receiver_email = '****'
+
+try:
+    max_attempts = 5
+    attempts = 0
+    while attempts < max_attempts:
+        try:
+            # Create a new instance of the Chrome webdriver
+            driver = webdriver.Chrome()
+
+            # Maximize the browser window
+            driver.maximize_window()
+
+            my_url = 'https://app.powerbi.com/groups/me/list?experience=power-bi'
+
+            # Open the URL
+            print(f"Opening Chrome")
+            driver.get(my_url)
+            time.sleep(5)
+            print(f"'{my_url}' opened successfully")
+
+            # Bring Chrome to the front after opening the URL
+            #bring_chrome_to_front()
+
+
+            # Find the elements by their IDs
+            element = driver.find_element(By.ID, "email")
+            subbtn = driver.find_element(By.ID, "submitBtn")
+
+            # Check if the element is found
+            if element:
+                print("Email Input found!")
+                element.send_keys(loginemail)
+                print(f"Email '{loginemail}' Entered")
+                time.sleep(2)
+                subbtn.click()
+                print("Email Submit Button Clicked...")
+                time.sleep(5)
+                passw = driver.find_element(By.ID, "i0118")
+                submpassw = driver.find_element(By.ID, "idSIButton9")
+                passw.send_keys(loginpass)
+                print(f"Password '{loginpass}' Entered")
+                time.sleep(2)
+                submpassw.click()
+                print("Login Button Clicked...")
+                time.sleep(5)
+
+                staysign = driver.find_element(By.ID, "idSIButton9")
+
+                if staysign:
+                    print("Stay Signed in Page Found...")
+                    staysign.click()
+                    for i in range(15, 0, -1):
+                        print(f"Waiting for the Page to open ...{i} seconds left.", end="\r")
+                        time.sleep(1)  # Wait for 1 second before checking again
+
+                    # Define the number of retries
+                    retries = 5
+                    for attempt in range(retries):
+                        print("\n" + f"Attempt {attempt + 1}/{retries}: Checking for Dashboard...")
+
+                        # Click on an element by its data-value attribute using XPath
+                        data_value = "*** Dashboard"
+                        xpath = f"//*[@data-value='{data_value}']"
+
+                        try:
+                            data_element = driver.find_element(By.XPATH, xpath)
+                        except NoSuchElementException:
+                            data_element = None
+
+                        if data_element:
+                            print(f"Dashboard found with name '{target_file_name}'")
+                            time.sleep(5)
+                            data_element.click()
+                            for i in range(20, 0, -1):
+                                print(f"Opening Dashboard ...{i} seconds left.", end="\r")
+                                time.sleep(1)  # Wait for 1 second before checking again
+
+                            # Define the number of retries for fileMenuBtn
+                            file_menu_retries = 5
+                            for file_menu_attempt in range(file_menu_retries):
+                                print(f"Attempt {file_menu_attempt + 1}/{file_menu_retries}: Finding fileMenuBtn...")
+                                try:
+                                    filebtn = driver.find_element(By.ID, "fileMenuBtn")
+                                except NoSuchElementException:
+                                    filebtn = None
+
+                                if filebtn:
+                                    time.sleep(2)
+                                    filebtn.click()
+                                    print("fileMenuBtn Clicked...")
+
+                                    # Click on an element by its title attribute using XPath
+                                    title_value = "Download this file"
+                                    xpath = f"//*[@title='{title_value}']"
+                                    title_element = driver.find_element(By.XPATH, xpath)
+                                    title_element.click()
+                                    time.sleep(2)
+                                    print("Download Confirmation")
+
+                                    downloadbtn = driver.find_element(By.ID, "okButton")
+                                    time.sleep(2)
+                                    downloadbtn.click()
+                                    print("Download Started")
+                                    time.sleep(5)
+
+                                    # Wait until the <h2> heading disappears
+                                    h2_xpath = "//h2[contains(text(), 'Exporting to Power BI Desktop (.pbix)')]"
+                                    wait_time = 0  # Initialize wait_time
+                                    while is_element_present(By.XPATH, h2_xpath):
+                                        wait_time += 1  # Increment wait_time by 1 second
+                                        print(f"\rWaiting for the { data_value } to Download ... ({wait_time} seconds elapsed)", end="")
+                                        time.sleep(1)  # Wait for 1 second before checking again
+
+                                    print("\nFile downloaded successfully")
+                                    print(f"Wait ... Checking File with name {target_file_name} in Download Folder...")
+                                    time.sleep(10)
+
+
+                                    # Get the path to the Downloads folder
+                                    downloads_path = os.path.join(os.path.expanduser("~"), "Downloads")
+
+                                    # Check if the Downloads folder exists
+                                    if os.path.exists(downloads_path) and os.path.isdir(downloads_path):
+                                        # Specify the name of the file you're looking for
+                                        target_file = "*** Dashboard.pbix"  
+                                        target_files = "*** Dashboard" 
+
+                                        # Check if the target file exists in the Downloads folder
+                                        if target_file in os.listdir(downloads_path):
+                                            print(f"{target_file} is found in the Download folder.")
+
+                                            # Construct the full path to the target file
+                                            target_file_path = os.path.join(downloads_path, target_file)
+
+                                            # Open the file using the default application
+                                            os.startfile(target_file_path)  # For Windows
+
+                                            minimize_all_windows()
+                                            print("All Windows Minimized")
+
+                                            # Wait for the file to open
+                                            for i in range(60, 0, -1):
+                                                print(f"Waiting for the file to open ...{i} seconds left.", end="\r")
+                                                time.sleep(1)  # Wait for 1 second before checking again
+
+                                            print("\nFile has been opened successfully!!")
+
+                                            '''def windowEnumHandler(hwnd, top_windows):
+                                                top_windows.append((hwnd, win32gui.GetWindowText(hwnd)))
+
+                                            def bringToFront(window_name):
+                                                top_windows = []
+                                                win32gui.EnumWindows(windowEnumHandler, top_windows)
+                                                for i in top_windows:
+                                                    # print(i[1])
+                                                    if window_name.lower() in i[1].lowe
+                                                    r():
+                                                        # print("found", window_name)
+                                                        win32gui.ShowWindow(i[0], win32con.SW_SHOWNORMAL)
+                                                        win32gui.SetForegroundWindow(i[0])
+                                                        break
+
+                                            # Test with notepad
+                                            if __name__ == "__main__":
+                                                winname = "*** Dashboard"
+                                                bringToFront(winname)'''
+
+                                            time.sleep(5)
+
+
+                                            file_window = pygetwindow.getWindowsWithTitle(target_files)[0]
+                                            if not file_window.isMaximized:  # Check if window is not already maximized
+                                                file_window.restore() 
+                                                file_window.maximize()
+                                                print("Window is now maximized.")
+                                                #Click on a specific button using pyautogui (adjust coordinates as needed)
+                                                button_x = 767  # X-coordinate of the button
+                                                button_y = 116  # Y-coordinate of the button
+                                                time.sleep(5)
+                                                pyautogui.click(file_window.left + button_x, file_window.top + button_y)
+                                                print("Button clicked successfully.")
+                                                for i in range(25, 0, -1):
+                                                    print(f"\rWaiting for the Dashboard to refresh ...{i} seconds left.", end=" ")
+                                                    time.sleep(1)  # Wait for 1 second before checking again
+                                                print("Refreshed Dashboard")
+
+                                            else:
+                                                file_window.restore() 
+                                                print("Window is already maximized.")
+                                                # Click on a specific button using pyautogui (adjust coordinates as needed)
+                                                button_x = 767  # X-coordinate of the button
+                                                button_y = 116  # Y-coordinate of the button
+                                                time.sleep(5)
+                                                pyautogui.click(file_window.left + button_x, file_window.top + button_y)
+                                                print("Button clicked successfully.")
+                                                for i in range(25, 0, -1):
+                                                    print(f"Waiting for the Dashboard to refresh ...{i} seconds left.", end="")
+                                                    time.sleep(1)  # Wait for 1 second before checking again
+                                                print("Dashboard Refreshed")
+
+
+                                            # Find the window associated with the file
+                                            #file_window = pygetwindow.getWindowsWithTitle(target_files)[0]
+                                            # Define the maximum number of attempts
+                                            max_attempts = 5
+                                            attempts = 0
+
+                                            # Find the window associated with the file
+                                            try:
+                                                file_window = pygetwindow.getWindowsWithTitle(target_file)[0]
+                                            except IndexError:
+                                                print(f"No window with title '{target_file}' found.")
+                                                exit()
+
+                                            while attempts < max_attempts:
+                                                try:
+                                                    # Close the window
+                                                    #file_window.close()
+                                                    print(f"Attempt {attempts + 1}: Closing & Saving {target_file} ...")
+                                                    time.sleep(20)  # Adjust sleep time as needed for the window to close
+                                                    pyautogui.hotkey('ctrl', 's')  # Save the file
+                                                    #time.sleep(5)  # Wait for the save operation to complete
+                                                    #pyautogui.press('enter')
+                                                    time.sleep(20)
+                                                    attempts += 1
+
+                                                    # Check if the file has been saved within the last 5 minutes
+                                                    downloads_folder = os.path.expanduser("~\Downloads")  # Assuming Downloads folder is in the user's home directory
+                                                    file_path = os.path.join(downloads_folder, target_file)
+                                                    if os.path.exists(file_path):
+                                                        file_modified_time = datetime.fromtimestamp(os.path.getmtime(file_path))
+                                                        current_time = datetime.now()
+                                                        time_difference = current_time - file_modified_time
+                                                        if time_difference <= timedelta(minutes=5):
+                                                            print(f"{target_file} has been closed & saved within the last 5 minutes.")
+                                                            file_window.close()
+                                                            time.sleep(10)
+                                                            break
+                                                        else:
+                                                            print(f"{target_file} has not been saved within the last 5 minutes.")
+                                                            time.sleep(10)  # Adjust sleep time as needed after pressing Enter
+                                                except pygetwindow.PyGetWindowException:
+                                                    print(f"{target_file} is Now Closed & Saved")
+                                                    break
+                                            else:
+                                                print(f"Window could not be closed after {max_attempts} attempts.")
+
+
+                                            '''if file_window:
+                                                # Close the window
+                                                file_window.close()
+                                                #button_x = 929  # X-coordinate of the button
+                                                #button_y = 571  # Y-coordinate of the button
+                                                time.sleep(10)
+                                                #pyautogui.click(file_window.left + button_x, file_window.top + button_y)
+                                                # Send an Enter key press
+                                                pyautogui.press('enter')
+                                                print("Saving Dashboard")
+                                                time.sleep(30)
+                                                print("Dashboard Saved")
+                                                time.sleep(10)'''
+
+                                            btnncut = driver.find_element(By.XPATH, "//button[@aria-label='eBux Mondelez Trend Analysis Dashboard']")
+                                            btnncut.click()
+                                            time.sleep(2)
+                                            print("\nMoving Back to Workspace to Upload File ")
+                                            workspace = driver.find_element(By.XPATH, "//button[@aria-label='My workspace']")
+                                            workspace.click()
+                                            time.sleep(5)
+                                            print("Back to Workspace")
+
+                                            # Loop to continuously check and bring Chrome to front until a condition is met
+                                            process_complete = False
+                                            while not process_complete:
+                                                bring_chrome_to_front()
+                                                try:
+                                                    btnnupload = driver.find_element(By.XPATH, "//button[@aria-label='Upload']")
+                                                    if btnnupload:
+                                                        print("Upload Button Found")
+                                                        time.sleep(5)
+                                                        btnnupload.click()
+                                                        print("Upload Clicked")
+                                                        btnbrowse = driver.find_element(By.XPATH, "//span[@aria-label='Upload_a_file_Workspace_Remove_Local_Upload_FFXL Browse']")
+                                                        if btnbrowse:
+                                                            print("Browse Button Found")
+                                                            btnbrowse.click()
+                                                            print("Browse Button Clicked")
+
+                                                            # Assuming you want to click a specific location using pyautogui
+                                                            button_xx = 259  # X-coordinate of the button
+                                                            button_yy = 61  # Y-coordinate of the button
+                                                            time.sleep(5)
+                                                            bring_chrome_to_fronttt()
+                                                            time.sleep(2)
+                                                            pyautogui.click(button_xx, button_yy)  # Click at the specified coordinates
+                                                            #time.sleep(2)
+                                                            pyautogui.write("Downloads")  # Type "Downloads"
+                                                            time.sleep(2)
+                                                            pyautogui.press("enter")  # Press Enter key
+                                                            print("Downloads Entered...")
+                                                            time.sleep(2)
+                                                            button_xxx = 263  # X-coordinate of the button
+                                                            button_yyy = 949  # Y-coordinate of the button
+                                                            #time.sleep(5)
+                                                            bring_chrome_to_fronttt()
+                                                            #time.sleep(2)
+                                                            pyautogui.click(button_xxx, button_yyy)  # Click at the specified coordinates
+                                                            time.sleep(2)
+                                                            pyautogui.write("eBux Mondelez Trend Analysis Dashboard")  # Type "Downloads"
+                                                            time.sleep(2)
+                                                            pyautogui.press("enter")  # Press Enter key
+                                                            print(f"Selecting {target_file_name} from Download Folder")
+                                                            time.sleep(2)
+                                                            replaceconfirm = driver.find_element(By.ID, "okButton")
+                                                            if replaceconfirm:
+                                                                print("Replacing File confirmation")
+                                                                replaceconfirm.click()
+                                                                time.sleep(5)
+                                                                # Wait until the <h2> heading disappears
+                                                                h2_xpath = "//h2[contains(text(), ' Uploading eBux Mondelez Trend Analysis Dashboard.pbix ')]"
+                                                                wait_time = 0  # Initialize wait_time
+                                                                while is_element_present(By.XPATH, h2_xpath):
+                                                                    wait_time += 1  # Increment wait_time by 1 second
+                                                                    print(f"Waiting for the { target_file_name } to get Uploaded ... ({wait_time} seconds elapsed)", end="\r")
+                                                                    time.sleep(1)  # Wait for 1 second before checking again
+
+                                                                print(f"\rFile {target_file_name} Uploaded Successfully!!")
+
+                                                            else : 
+                                                                print(f"File {target_file_name} Not Found")
+                                                                #send_email
+
+                                                            # Assuming some condition to check if the process is complete
+                                                            process_complete = True
+                                                        else:
+                                                            print("Browse Button Not Found")
+                                                    else:
+                                                        print("Upload Button Not found")
+                                                except NoSuchElementException:
+                                                    print("Element not found. Retrying...")
+                                                    driver.refresh()
+                                                    time.sleep(10)
+
+
+                                            '''else:
+                                                print("File window not found.")'''
+
+                                        else:
+                                            print(f"{target_file} is not found in the Downloads folder.")
+                                    else:
+                                        print("Downloads folder not found.")
+
+                                    break  # Exit the retry loop since dashboard is found
+                                else:
+                                    print("fileMenuBtn not found.")
+                                    time.sleep(10)
+                                    bring_chrome_to_front()
+                                    driver.refresh()
+                                    time.sleep(10)
+                            else:
+                                print(f"fileMenuBtn not found after {file_menu_retries} attempts.")
+                                # Handle the case where fileMenuBtn is not found even after retries
+
+                            # Proceed with other actions after fileMenuBtn is found
+                            break  # Exit the retry loop since dashboard is found
+                        else:
+                            print(f"Dashboard not found with name '{target_file_name}'.")
+                            time.sleep(10)
+                            bring_chrome_to_front()
+                            driver.refresh()
+                            time.sleep(10)
+
+                    else:
+                        print(f"Dashboard '{target_file_name}' not found after {retries} attempts.")
+                        # Send email or handle the case where dashboard is not found even after retries
+
+                else:
+                    print("Stay Signed in Page Not Found...")
+                    # Copy code from the "else" block before
+
+            else:
+                print("Element not found.")
+                # Send email or handle the case where the initial elements are not found
+            print("Sending Mail")
+            send_success_email(sender_email, sender_password, receiver_email, success_subject, success_message)
+            print("Mail Successfully sent")
+            break
+        except:
+            print(f"Retry attempt {attempts + 1}")
+            chrome_sign_in()
+            time.sleep(10)
+            attempts += 1
+    else:
+        print(f"Maximum retry attempts {attempts} reached. Exiting...")
+        send_email(sender_email, sender_password, receiver_email, Browse_error, Browse_message)
+
+except KeyboardInterrupt:
+    print("Execution interrupted by user.")
+    send_success_email(sender_email, sender_password, receiver_email, Keyboard_subject, keyboard_message)
+    
+except Exception as e:
+    error_message = f"Error occurred: {e}"
+    print(error_message)
+    send_email(sender_email, sender_password, receiver_email, Error_subject, error_message)
+
+finally:
+    # Close the browser
+    driver.quit()
+    print("Browser Closed")
